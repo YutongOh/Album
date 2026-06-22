@@ -9,6 +9,11 @@
 | `index.html` | 四组实验列表（V1–V4 Effect Loading 1.2s） |
 | `preview.html` | 预览壳：切换实验组、缩放、自适应、重启 |
 
+## 在线预览（GitHub Pages）
+
+- 列表入口：<https://yutongoh.github.io/Album/>
+- 预览壳：<https://yutongoh.github.io/Album/preview.html?v=v1>（`v1`–`v4`）
+
 ## 本地预览
 
 ```bash
