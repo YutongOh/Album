@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="12" fill="#000000"/>
+  <rect width="64" height="64" rx="12" fill="url(#effectCoverPlaceholderGrad)"/>
+  <defs>
+    <radialGradient id="effectCoverPlaceholderGrad" cx="0" cy="0" r="10" gradientUnits="userSpaceOnUse" gradientTransform="matrix(6.4 6.4 -6.4 6.4 0 0)">
+      <stop stop-color="rgba(255,255,255,0.19)"/>
+      <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+</svg>

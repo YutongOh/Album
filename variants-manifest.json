@@ -1,0 +1,22 @@
+[
+  {
+    "id": "v1",
+    "label": "V1",
+    "path": "variants/v1/index.html"
+  },
+  {
+    "id": "v2",
+    "label": "V2",
+    "path": "variants/v2/index.html"
+  },
+  {
+    "id": "v3",
+    "label": "V3",
+    "path": "variants/v3/index.html"
+  },
+  {
+    "id": "v4",
+    "label": "V4",
+    "path": "variants/v4/index.html"
+  }
+]
