@@ -38,8 +38,9 @@ body {
   top: max(10px, env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
+  width: max-content;
+  max-width: min(calc(100vw - 16px), 720px);
   height: 40px;
-  max-width: min(96vw, 720px);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -67,11 +68,6 @@ body {
 .tool-group:first-of-type {
   border-left: 0;
   padding-left: 0;
-}
-
-.spacer {
-  flex: 1;
-  min-width: 8px;
 }
 
 button,
@@ -361,18 +357,13 @@ body.has-touch-cursor #app-frame {
 }
 
 @media (max-width: 640px) {
-  .toolbar {
-    width: calc(100vw - 16px);
-    max-width: none;
-  }
-
   #variantSelect {
-    min-width: 0;
-    flex: 1;
-    max-width: none;
+    min-width: 64px;
+    max-width: 80px;
   }
 
-  .spacer {
-    display: none;
+  #zoomSelect {
+    min-width: 76px;
+    max-width: 96px;
   }
 }

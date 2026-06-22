@@ -13,11 +13,14 @@
   --shape-n4: rgba(255, 255, 255, 0.13);
   --shape-n2: rgba(255, 255, 255, 0.32);
   --sheet-flat2: #1e1e1e;
-  --entry-bg: rgba(51, 51, 51, 0.6);
-  --entry-border: rgba(255, 255, 255, 0.13);
-  --drafts-bg: rgba(51, 51, 51, 0.6);
-  --drafts-text: rgba(255, 255, 255, 0.88);
-  --more-circle-bg: rgba(51, 51, 51, 0.6);
+  /* UIImageOverlayDarkGrayA60 — Camera / Effect 入口填充与 inset 描边（AbulmV*Page.kt） */
+  --overlay-dark-a60: rgba(51, 51, 51, 0.6);
+  --entry-bg: var(--overlay-dark-a60);
+  --entry-border: var(--overlay-dark-a60);
+  /* UIShapeNeutral4 — Nav Drafts 胶囊填充，无描边（AlbumV4DraftsButton） */
+  --drafts-bg: var(--shape-n4);
+  --drafts-text: var(--text-secondary);
+  --more-circle-bg: var(--overlay-dark-a60);
 }
 
 * {
@@ -199,6 +202,15 @@ body.variant-embed .phone {
   align-items: center;
   justify-content: flex-end;
   will-change: transform, opacity;
+}
+
+#navDrafts {
+  opacity: 1;
+}
+
+#navCamera {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .drafts-btn {

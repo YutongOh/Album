@@ -289,13 +289,42 @@
       return false;
     }
 
-    function elementTextColor(el, win) {
+    function textMeasureTarget(el, win) {
       if (!isTextualElement(el, win)) return null;
-      const textEl =
+      return (
         el.querySelector(':scope > span, :scope > p, :scope > label') ||
-        (hasDirectText(el) ? el : null);
-      const target = textEl || el;
+        (hasDirectText(el) ? el : null) ||
+        el
+      );
+    }
+
+    function elementTextColor(el, win) {
+      const target = textMeasureTarget(el, win);
+      if (!target) return null;
       return readableColor(win.getComputedStyle(target).color);
+    }
+
+    function elementTypography(el, win) {
+      const target = textMeasureTarget(el, win);
+      if (!target) return null;
+      const cs = win.getComputedStyle(target);
+      if (window.TuxTypographyResolver) {
+        const fromSelf = TuxTypographyResolver.describeElement(target, cs);
+        if (fromSelf) return fromSelf;
+      }
+      const parent = target.parentElement;
+      if (parent && parent !== target && window.TuxTypographyResolver) {
+        const parentCs = win.getComputedStyle(parent);
+        if (
+          parseFloat(parentCs.fontSize) === parseFloat(cs.fontSize) &&
+          parentCs.fontWeight === cs.fontWeight &&
+          parentCs.lineHeight === cs.lineHeight
+        ) {
+          const fromParent = TuxTypographyResolver.describeElement(parent, parentCs);
+          if (fromParent) return fromParent;
+        }
+      }
+      return null;
     }
 
     function elementHasCoverImage(el, win) {
@@ -341,6 +370,13 @@
     function dp(value) {
       const n = Number(value);
       return Number.isFinite(n) ? Math.round(n) : 0;
+    }
+
+    function strokeDp(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return 0;
+      if (n < 1) return Math.round(n * 10) / 10;
+      return Math.round(n);
     }
 
     function isInspectable(el, win) {
@@ -494,34 +530,53 @@
 
     function parseInsetBoxShadow(boxShadow) {
       if (!boxShadow || boxShadow === 'none') return null;
-      const re = /inset\s+([-\d.]+px)\s+([-\d.]+px)\s+([-\d.]+px)\s+([-\d.]+px)\s+(rgba?\([^)]+\)|hsla?\([^)]+\)|#[0-9a-fA-F]+|[a-zA-Z]+)/gi;
-      let match = re.exec(boxShadow);
-      while (match) {
-        const width = parseFloat(match[4]);
-        const color = match[5].trim();
+      const layers = boxShadow.split(/,(?![^(]*\))/).map((layer) => layer.trim());
+      for (const layer of layers) {
+        if (!/\binset\b/i.test(layer)) continue;
+        const colorMatch = layer.match(/(rgba?\([^)]+\)|hsla?\([^)]+\)|#[0-9a-fA-F]{3,8})\s*$/i);
+        const nums = layer.match(/-?[\d.]+px/g);
+        if (!colorMatch || !nums || nums.length < 4) continue;
+        const width = parseFloat(nums[3]);
+        const color = colorMatch[1].trim();
         if (width > 0 && readableColor(color)) {
           return { width, color };
         }
-        match = re.exec(boxShadow);
       }
       return null;
     }
 
-    function detectStroke(el, win) {
-      const cs = win.getComputedStyle(el);
+    function strokeFromBorder(cs) {
       const sides = ['Top', 'Right', 'Bottom', 'Left'];
       const widths = sides.map((s) => parseFloat(cs[`border${s}Width`]) || 0);
       const colors = sides.map((s) => readableColor(cs[`border${s}Color`]));
-      if (widths.some((w) => w > 0)) {
-        const uniqW = [...new Set(widths.map((w) => dp(w)))];
-        const uniqC = [...new Set(colors.filter(Boolean))];
+      if (!widths.some((w) => w > 0)) return null;
+      const uniqW = [...new Set(widths.map((w) => strokeDp(w)))];
+      const uniqC = [...new Set(colors.filter(Boolean))];
+      return {
+        t: widths[0],
+        r: widths[1],
+        b: widths[2],
+        l: widths[3],
+        color: uniqC.length === 1 ? uniqC[0] : colors.find(Boolean) || colors[0],
+        uniform: uniqW.length === 1,
+      };
+    }
+
+    function detectStroke(el, win) {
+      const cs = win.getComputedStyle(el);
+      const borderStroke = strokeFromBorder(cs);
+      if (borderStroke) return borderStroke;
+
+      const outlineWidth = parseFloat(cs.outlineWidth) || 0;
+      const outlineColor = readableColor(cs.outlineColor);
+      if (outlineWidth > 0 && outlineColor) {
         return {
-          t: widths[0],
-          r: widths[1],
-          b: widths[2],
-          l: widths[3],
-          color: uniqC.length === 1 ? uniqC[0] : colors[0],
-          uniform: uniqW.length === 1 && uniqC.length <= 1,
+          t: outlineWidth,
+          r: outlineWidth,
+          b: outlineWidth,
+          l: outlineWidth,
+          color: outlineColor,
+          uniform: true,
         };
       }
 
@@ -551,35 +606,39 @@
             uniform: true,
           };
         }
+        const pseudoBorder = strokeFromBorder(ps);
+        if (pseudoBorder) return pseudoBorder;
       }
       return null;
-    }
-
-    function strokeMeasureRow(stroke) {
-      if (!stroke) return '';
-      const info = formatMeasureColor(stroke.color);
-      const widthHtml = stroke.uniform
-        ? `${dp(stroke.t)} dp`
-        : formatBoxSides(stroke.t, stroke.r, stroke.b, stroke.l);
-      if (!info) {
-        return `<div class="measure-row"><span>描边</span><strong>${widthHtml}</strong></div>`;
-      }
-      const title = info.token ? ` title="${info.token}"` : '';
-      return `<div class="measure-row"><span>描边</span><strong${title}>${widthHtml}<span class="measure-stroke-sep">·</span><span class="measure-swatch" style="background:${info.swatch}"></span><span class="measure-color-label">${info.label}</span></strong></div>`;
     }
 
     function formatMeasureColor(raw) {
       if (!raw) return null;
       if (window.TuxColorResolver) {
         const info = TuxColorResolver.describe(raw);
-        if (!info) return null;
-        return {
-          swatch: raw,
-          label: info.label,
-          token: info.token,
-        };
+        if (info) {
+          return {
+            swatch: raw,
+            label: info.label,
+            token: info.token,
+          };
+        }
       }
-      return null;
+      return {
+        swatch: raw,
+        label: raw,
+        token: '',
+      };
+    }
+
+    function strokeMeasureRow(stroke) {
+      if (!stroke) return '';
+      const info = formatMeasureColor(stroke.color);
+      const widthHtml = stroke.uniform
+        ? `${strokeDp(stroke.t)} dp`
+        : `<span class="measure-box-sides"><span>↑${strokeDp(stroke.t)}</span><span>→${strokeDp(stroke.r)}</span><span>↓${strokeDp(stroke.b)}</span><span>←${strokeDp(stroke.l)}</span></span>`;
+      const title = info.token ? ` title="${info.token}"` : '';
+      return `<div class="measure-row"><span>描边</span><strong${title}>${widthHtml}<span class="measure-stroke-sep">·</span><span class="measure-swatch" style="background:${info.swatch}"></span><span class="measure-color-label">${info.label}</span></strong></div>`;
     }
 
     const SPACING_REFERENCE_SELECTOR = [
@@ -765,6 +824,12 @@
       return `<div class="measure-row"><span>${label}</span><strong${title}><span class="measure-swatch" style="background:${info.swatch}"></span><span class="measure-color-label">${info.label}</span></strong></div>`;
     }
 
+    function typographyMeasureRow(info) {
+      if (!info?.label) return '';
+      const title = info.token ? ` title="${info.token}"` : '';
+      return `<div class="measure-row"><span>文字</span><strong${title}>${info.label}</strong></div>`;
+    }
+
     function fillMeasureRow(fill) {
       if (fill === 'image') {
         return '<div class="measure-row"><span>填充</span><strong>image</strong></div>';
@@ -776,6 +841,7 @@
       const cs = win.getComputedStyle(el);
       const bg = elementFill(el, win);
       const color = elementTextColor(el, win);
+      const typography = elementTypography(el, win);
       const padding = {
         t: parsePx(cs.paddingTop),
         r: parsePx(cs.paddingRight),
@@ -794,6 +860,7 @@
         el,
         bg,
         color,
+        typography,
         w: el.offsetWidth,
         h: el.offsetHeight,
         padding,
@@ -825,9 +892,13 @@
         const fillRow = fillMeasureRow(data.bg);
         if (fillRow) rows.push(fillRow);
       }
+      if (data.typography) {
+        const typographyRow = typographyMeasureRow(data.typography);
+        if (typographyRow) rows.push(typographyRow);
+      }
       if (data.color) {
-        const textRow = colorMeasureRow('文字', data.color);
-        if (textRow) rows.push(textRow);
+        const textColorRow = colorMeasureRow('文字色', data.color);
+        if (textColorRow) rows.push(textColorRow);
       }
       if (hasBoxSides(data.padding)) {
         rows.push(boxMeasureRow('内边距', data.padding.t, data.padding.r, data.padding.b, data.padding.l));

@@ -97,6 +97,7 @@
     if (els.navCameraBtn) {
       els.navCameraBtn.style.pointerEvents = navProgress >= 0.5 ? 'auto' : 'none';
     }
+    els.navCamera.style.pointerEvents = navProgress >= 0.5 ? 'auto' : 'none';
   }
 
   function tickNavAnimation(now) {
@@ -127,8 +128,21 @@
     navAnimRaf = requestAnimationFrame(tickNavAnimation);
   }
 
+  /** Match Abulm*ScrollBehavior.isCameraEntryFullyObscured — button bottom clears scroll viewport. */
+  function getCameraEntryEl() {
+    return document.querySelector(
+      '.camera-btn-v3, .camera-btn-v4, .camera-entry-v2, .entry-btn--camera',
+    );
+  }
+
   function isCameraEntryObscured() {
-    return els.albumScroll.scrollTop >= C.cameraNavSwitchScrollH - 1;
+    const entry = getCameraEntryEl();
+    if (entry && els.albumScroll) {
+      const scrollRect = els.albumScroll.getBoundingClientRect();
+      const entryRect = entry.getBoundingClientRect();
+      return entryRect.bottom <= scrollRect.top + 0.5;
+    }
+    return els.albumScroll.scrollTop >= C.cameraNavSwitchScrollH;
   }
 
   function isTabPinned() {

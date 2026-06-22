@@ -66,6 +66,35 @@
     );
   }
 
+  /** CSS rgba mirrors for TUX tokens used in AbulmV1/V2/V4 + FigmaAlbumV4 pages. */
+  const SEMANTIC_ALIASES = [
+    { r: 255, g: 255, b: 255, a: 0.13, token: 'UIShapeNeutral4' },
+    { r: 255, g: 255, b: 255, a: 0.19, token: 'UIShapeNeutral3' },
+    { r: 255, g: 255, b: 255, a: 0.32, token: 'UIShapeNeutral2' },
+    { r: 255, g: 255, b: 255, a: 0.88, token: 'UIText2' },
+    { r: 255, g: 255, b: 255, a: 0.6, token: 'UIText3' },
+    { r: 246, g: 246, b: 246, a: 1, token: 'UIText1' },
+    { r: 51, g: 51, b: 51, a: 0.6, token: 'UIImageOverlayDarkGrayA60' },
+  ];
+
+  function resolveSemanticAlias(rgba) {
+    for (const alias of SEMANTIC_ALIASES) {
+      if (
+        Math.abs(rgba.r - alias.r) <= 1 &&
+        Math.abs(rgba.g - alias.g) <= 1 &&
+        Math.abs(rgba.b - alias.b) <= 1 &&
+        Math.abs(rgba.a - alias.a) <= 0.02
+      ) {
+        return {
+          token: alias.token,
+          label: formatTokenLabel(alias.token),
+          rgba,
+        };
+      }
+    }
+    return null;
+  }
+
   function formatTokenLabel(token) {
     let m = token.match(/^UIImageOverlay(DarkGray|Black|White)(A\d+)?$/);
     if (m) {
@@ -148,6 +177,9 @@
   function resolve(colorInput) {
     const rgba = parseColor(colorInput);
     if (!rgba || !index) return null;
+
+    const semantic = resolveSemanticAlias(rgba);
+    if (semantic) return semantic;
 
     const exactKey = `${Math.round(rgba.r)},${Math.round(rgba.g)},${Math.round(rgba.b)},${rgba.a.toFixed(3)}`;
     if (index.has(exactKey)) return index.get(exactKey);

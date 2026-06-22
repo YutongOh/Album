@@ -522,6 +522,30 @@ def variant_page(cfg: dict) -> str:
 """
 
 
+def sync_album_css_tokens() -> None:
+    """Keep shared/album.css TUX vars aligned with DesignLab Compose sources."""
+    css_path = SHARED / "album.css"
+    text = css_path.read_text(encoding="utf-8")
+    block = """  --sheet-flat2: #1e1e1e;
+  /* UIImageOverlayDarkGrayA60 — Camera / Effect 入口填充与 inset 描边（AbulmV*Page.kt） */
+  --overlay-dark-a60: rgba(51, 51, 51, 0.6);
+  --entry-bg: var(--overlay-dark-a60);
+  --entry-border: var(--overlay-dark-a60);
+  /* UIShapeNeutral4 — Nav Drafts 胶囊填充，无描边（AlbumV4DraftsButton） */
+  --drafts-bg: var(--shape-n4);
+  --drafts-text: var(--text-secondary);
+  --more-circle-bg: var(--overlay-dark-a60);"""
+    text, count = re.subn(
+        r"  --sheet-flat2: #1e1e1e;\n(?:  .*\n)*?  --more-circle-bg: .*;\n",
+        block + "\n",
+        text,
+        count=1,
+    )
+    if count != 1:
+        raise RuntimeError("failed to sync TUX token block in shared/album.css")
+    css_path.write_text(text, encoding="utf-8")
+
+
 def sync_assets() -> None:
     dst = SHARED / "assets"
     dst.mkdir(parents=True, exist_ok=True)
@@ -534,6 +558,7 @@ def sync_assets() -> None:
 
 def main() -> None:
     sync_assets()
+    sync_album_css_tokens()
     manifest = []
     for vid, meta in VARIANTS.items():
         dimens = parse_dimens(meta["kotlin"])
