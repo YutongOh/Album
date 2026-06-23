@@ -1067,9 +1067,9 @@
         };
 
         doc.addEventListener('pointermove', moveFrame);
-        doc.addEventListener('pointerdown', onDown);
-        doc.addEventListener('pointerup', onUp);
-        doc.addEventListener('pointercancel', onUp);
+        doc.addEventListener('pointerdown', onDown, true);
+        doc.addEventListener('pointerup', onUp, true);
+        doc.addEventListener('pointercancel', onUp, true);
         doc.addEventListener('mouseleave', hideCursor);
       } catch (_) {}
     }

@@ -377,9 +377,12 @@
     }));
   }
 
-  function openCapture() {
+  function openCapture(options = {}) {
     if (!els.capture || !els.album) return;
     resetCaptureState();
+    if (options.selectFirstEffect) {
+      selectCapEffect(0);
+    }
     els.album.classList.remove('active');
     els.capture.classList.add('active');
     playCapturePanelEnter();
@@ -540,6 +543,22 @@
     el.addEventListener('touchcancel', scheduleEndGesture, { passive: true });
   }
 
+  function setupMoreNavigation() {
+    document.querySelector('.popular-more')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCapture();
+    });
+
+    if (C.layout === 'popularEffects') {
+      document.querySelector('.effects-more')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const limits = effectsLimits();
+        if (limits) snapEffectsAndNavigate(limits);
+        else openCapture();
+      });
+    }
+  }
+
   function resetDemo() {
     clearTimeout(effectCoverTimer);
     effectCoverTimer = null;
@@ -602,10 +621,11 @@
     els.effectsEntryBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
     els.effectsEntryBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      openCapture();
+      openCapture({ selectFirstEffect: C.layout === 'sideBySide' });
     });
   }
 
+  setupMoreNavigation();
   els.albumScroll.addEventListener('scroll', syncScrollState, { passive: true });
 
   paintNav(0);
