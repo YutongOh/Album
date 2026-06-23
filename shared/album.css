@@ -500,6 +500,9 @@ body.variant-embed .phone {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .popular-title {
@@ -520,6 +523,9 @@ body.variant-embed .phone {
   align-items: center;
   gap: 2px;
   cursor: pointer;
+  padding: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .effects-more {

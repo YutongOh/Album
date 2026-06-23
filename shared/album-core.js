@@ -3,6 +3,7 @@
  * Config via window.__ALBUM_VARIANT__ (generated from Kotlin Dimens).
  */
 (function () {
+  const ALBUM_CORE_VERSION = '3';
   const C = window.__ALBUM_VARIANT__;
   if (!C) {
     console.error('Missing __ALBUM_VARIANT__');
@@ -544,19 +545,23 @@
   }
 
   function setupMoreNavigation() {
-    document.querySelector('.popular-more')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      openCapture();
-    });
-
-    if (C.layout === 'popularEffects') {
-      document.querySelector('.effects-more')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        const limits = effectsLimits();
-        if (limits) snapEffectsAndNavigate(limits);
-        else openCapture();
-      });
-    }
+    document.addEventListener(
+      'click',
+      (e) => {
+        if (e.target.closest('.popular-more')) {
+          e.preventDefault();
+          openCapture();
+          return;
+        }
+        if (C.layout === 'popularEffects' && e.target.closest('.effects-more')) {
+          e.preventDefault();
+          const limits = effectsLimits();
+          if (limits) snapEffectsAndNavigate(limits);
+          else openCapture();
+        }
+      },
+      true,
+    );
   }
 
   function resetDemo() {
@@ -592,7 +597,9 @@
 
   window.__albumDemo = {
     reset: resetDemo,
+    openCapture,
     config: C,
+    version: ALBUM_CORE_VERSION,
     effectsLimits,
     getState: () => ({
       navSwitched,

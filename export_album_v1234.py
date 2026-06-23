@@ -516,7 +516,7 @@ def variant_page(cfg: dict) -> str:
     <div class="system-home-indicator" aria-hidden="true"><div class="system-home-indicator-handle"></div></div>
   </div>
   <script>window.__ALBUM_VARIANT__ = {cfg_json};</script>
-  <script src="../../shared/album-core.js"></script>
+  <script src="../../shared/album-core.js?v=3"></script>
 </body>
 </html>
 """

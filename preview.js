@@ -5,6 +5,7 @@
   const ZOOM_FIT = 'fit';
   const STAGE_PAD = 16;
   const TOOLBAR_GAP = 10;
+  const PREVIEW_BUILD = '3';
 
   const VARIANTS = [
     { id: 'v1', label: 'V1', path: 'variants/v1/index.html' },
@@ -92,6 +93,12 @@
     applyLayout();
   }
 
+  function variantFrameUrl(path) {
+    const url = new URL(path, window.location.href);
+    url.searchParams.set('build', PREVIEW_BUILD);
+    return `${url.pathname}${url.search}`;
+  }
+
   function setVariant(variantId, reload = true) {
     currentVariant = variantId;
     const meta = VARIANTS.find((v) => v.id === variantId);
@@ -99,7 +106,7 @@
     els.variantSelect.value = variantId;
     updateUrl(variantId);
     if (reload) {
-      els.frame.src = meta.path;
+      els.frame.src = variantFrameUrl(meta.path);
     }
   }
 
@@ -107,7 +114,7 @@
     try {
       els.frame.contentWindow.postMessage({ type: 'album:reload' }, '*');
     } catch (_) {
-      els.frame.src = els.frame.src;
+      els.frame.src = variantFrameUrl(VARIANTS.find((v) => v.id === currentVariant)?.path || 'variants/v1/index.html');
     }
   }
 
