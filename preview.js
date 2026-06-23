@@ -3,8 +3,8 @@
   const FRAME_H = 800;
   const ZOOM_STEPS = [0.5, 0.75, 1];
   const ZOOM_FIT = 'fit';
-  const STAGE_PAD = 24;
-  const TOOLBAR_GAP = 28;
+  const STAGE_PAD = 16;
+  const TOOLBAR_GAP = 10;
 
   const VARIANTS = [
     { id: 'v1', label: 'V1', path: 'variants/v1/index.html' },
@@ -48,7 +48,7 @@
 
   function toolbarClearance() {
     const rect = els.toolbar?.getBoundingClientRect();
-    return rect ? rect.bottom + TOOLBAR_GAP : 72;
+    return rect ? rect.bottom + TOOLBAR_GAP : 56;
   }
 
   function currentScale() {

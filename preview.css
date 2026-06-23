@@ -35,7 +35,7 @@ body {
 
 .toolbar {
   position: fixed;
-  top: max(10px, env(safe-area-inset-top, 0px));
+  top: max(6px, env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   width: max-content;

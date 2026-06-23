@@ -259,6 +259,7 @@ body.variant-embed .phone {
   min-height: 0;
   overflow: hidden;
   position: relative;
+  background: var(--bg);
 }
 
 .album-scroll {
@@ -268,6 +269,7 @@ body.variant-embed .phone {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  background: var(--bg);
 }
 
 .album-scroll::-webkit-scrollbar {
@@ -631,6 +633,7 @@ body.variant-embed .phone {
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  background: var(--bg);
 }
 
 .recents-v48 {
@@ -667,21 +670,24 @@ body.variant-embed .phone {
 
 .tabs-section {
   flex-shrink: 0;
+  background: var(--bg);
 }
 
 .tabs-section.tabs-hidden {
-  opacity: 0;
+  visibility: hidden;
 }
 
 .tabs-pinned {
   position: absolute;
-  top: 0;
+  top: -1px;
   left: 0;
   right: 0;
-  z-index: 2;
+  z-index: 3;
   background: var(--bg);
   opacity: 0;
   pointer-events: none;
+  padding-top: 1px;
+  box-sizing: border-box;
 }
 
 .tabs-pinned.visible {
@@ -692,6 +698,8 @@ body.variant-embed .phone {
 .tabs-row {
   height: 40px;
   display: flex;
+  box-sizing: border-box;
+  border-bottom: 0.5px solid var(--shape-n3);
 }
 
 .tab-item {
@@ -721,8 +729,7 @@ body.variant-embed .phone {
 }
 
 .tab-sep {
-  height: 0.5px;
-  background: var(--shape-n3);
+  display: none;
 }
 
 .grid-wrap {
